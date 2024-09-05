@@ -139,13 +139,22 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('chatBox').style.display = 'none';
     });
 
-    // Initialize Socket.IO connection
+    // Initialize Socket.IO connection with the api_key included
     const socket = io('http://34.42.49.118:8080/', {
         withCredentials: true,
-        query: { api_key: client_key }
-    });  
-    // Replace with your actual Flask app URL
+        query: { api_key: client_key }  // Send api_key as a query parameter
+    });
+
     let chatHistory = '';
+
+    // Log socket connection and disconnection
+    socket.on('connect', function() {
+        console.log("Connected to server");
+    });
+
+    socket.on('disconnect', function() {
+        console.log("Disconnected from server");
+    });
 
     document.getElementById('sendBtn').addEventListener('click', function() {
         sendMessage();
@@ -158,16 +167,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     socket.on('bot_message', function(data) {
-		console.log("Bot message received!")
+        console.log("Bot message received:", data.message);  // Log bot's response
         const message = data.message;
-        displayMessage('Clara', message);
+        displayMessage('Bot', message);
         chatHistory += `Bot: ${message}\n`;
     });
 
     function sendMessage() {
         const userInput = document.getElementById('userInput').value;
         if (userInput.trim() !== '') {
-			console.log("Sending message to server!")
+            console.log("Sending message to server:", userInput);  // Log user input
             displayMessage('You', userInput);
             chatHistory += `User: ${userInput}\n`;
             socket.emit('user_message', { message: userInput, history: chatHistory });
